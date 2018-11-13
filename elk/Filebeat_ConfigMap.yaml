@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: elk
+  name: filebeat-configmap
+data:
+  filebeat.yml: |
+    filebeat.prospectors:
+    - document_type: kube-logs
+      exclude_files:
+      - filebeat.*log
+      - kube.*log
+      input_type: log
+      json.add_error_key: true
+      json.keys_under_root: true
+      json.message_key: log
+      multiline.match: after
+      multiline.pattern: ^\s
+      paths:
+      - /var/log/containers/*.log
+      symlinks: true
+    logging.level: ${LOG_LEVEL}
+    output.logstash:
+      hosts: logstash:5043
+      timeout: 15

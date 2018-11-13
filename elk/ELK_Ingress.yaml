@@ -1,0 +1,37 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    namespace: elk
+    name: elk.ingress
+    annotations:
+      # type of authentication
+      ingress.kubernetes.io/auth-type: basic
+      # name of the secret that contains the user/password definitions
+      ingress.kubernetes.io/auth-secret: basic-auth
+      # message to display with an appropriate context why the authentication is required
+      ingress.kubernetes.io/auth-realm: "Authentication Required - nanchao"
+      ingress.kubernetes.io/secure-backends: "true"
+  spec:
+    rules:
+    - host: kibana.mrcharleshu.com
+      http:
+        paths:
+        - backend:
+            serviceName: kibana
+            servicePort: 80
+          path: /
+    - host: elasticsearch.mrcharleshu.com
+      http:
+        paths:
+        - backend:
+            serviceName: elasticsearch
+            servicePort: 9200
+          path: /
+    tls:
+    - hosts:
+      - kibana.mrcharleshu.com
+      - elasticsearch.mrcharleshu.com
+      secretName: mrcharleshu-tls
+kind: List
