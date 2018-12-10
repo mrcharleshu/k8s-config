@@ -111,55 +111,8 @@ ingress.extensions "elk.ingress" created
 Logstash在我们的集群中最重要的配置文件就是**Logstash_ConfigMap.yaml**中的**logstash.conf**，配置文件中间部分的filter是Logstash过滤日志，结构化日志的核心配置。
 定义多个匹配规则，满足各个应用的日志输入格式
 
-### 当前系统有以下常用格式：
-- Java项目的日志格式分为
-	- 网关日志
-
-	```json
-	{
-	"log": "2018-12-07 13:58:58.709 [http-nio-8080-exec-1] INFO  o.n.p.a.f.AccessLogFilter - [1.32.0] "GET <b78d102f-809f-459f-b6f0-8eb95f72e3f2> http://api.mrcharleshu.com/api/v1/admin/companies/3/stat_categories/5/details" >> plant-insight",
-	"match": "%{DATA:log_date} %{TIME:log_time} \[%{USERNAME:log_thread}\] %{LOGLEVEL:log_level} %{DATA:log_program_file} - \[%{DATA:log_app_version}\] \"%{WORD:log_method} <%{DATA:log_session_id}> %{URI:log_request_url}\" >> %{USERNAME:log_app_name}"
-	}
-	```
-	- 服务日志
-	
-	```json
-	{
-	"log": "2018-12-06 17:10:32.720 [ForkJoinPool.commonPool-worker-4] INFO  o.n.p.j.c.WorkDayShiftSpecCalculator - dpId = 40, putIntoCache list size = 1",
-	"match: "%{DATA:log_date} %{TIME:log_time} \[%{USERNAME:log_thread}\] %{LOGLEVEL:log_level} %{DATA:log_program_file} - %{GREEDYDATA:log_content}"
-	}
-	```
-- Node项目的日志有
-	- rule-engine
-	
-	```json
-	{
-	"log": "2018-12-07T08:16:12.100 INFO server - GET /api/v1/rule/healthcheck 200 9",
-	"match": "%{DATA:log_date}T%{TIME:log_time} %{LOGLEVEL:log_level} %{DATA:log_unknow} - %{WORD:log_method} %{URIPATHPARAM:log_request_url} %{INT:log_http_status} %{NUMBER:log_response_time}"
-	}
-	```
-	- pi-bk-auth
-	
-	```json
-	{
-	"log": "2018-12-06T16:44:23.685 28 INFO - \u001b[32m[LoggingInterceptor]\u001b[39m - GET `/api/v1/bkauth/health` 0ms",
-	"match": "%{DATA:log_date}T%{TIME:log_time} %{INT:log_unknown} %{LOGLEVEL:log_level} - .*\[%{DATA:log_program_file}\].* - %{WORD:log_method} `%{URIPATHPARAM:log_origin_url}` %{INT:log_response_time}ms"
-	}
-	```
-	- pi-bk-trade
-	同上
-- Python项目的日志
-
-	```json
-	{
-	"log": "2018-12-07 08:10:04,614 WARNING IoTHubClient.RuntimeDataWorker not find indicator_id: 1772“,
-	"match": "%{DATA:log_date} %{TIME:log_time} %{LOGLEVEL:log_level} %{DATA:log_program_file} %{GREEDYDATA:log_content}"
-	}
-	```
-
 ### 注意事项
 - **在新项目启动时，输入日志应尽量和以上兼容**
-- **三个node项目和python项目的日志格式可以统一**
 
 ### 参考资料
 - [Logstash Configuration](https://www.elastic.co/guide/en/logstash/6.x/config-setting-files.html)
