@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: elk
+  name: logstash-configmap
+data:
+
+  logstash.yml: |
+    dead_letter_queue.enable: true
+    xpack.monitoring.enabled: true
+    xpack.monitoring.elasticsearch.url: http://elasticsearch:9200
+    xpack.monitoring.elasticsearch.username: kibana
+    xpack.monitoring.elasticsearch.password: Password1$
+
+  logstash.conf: |
+    input {
+      beats {
+        host => "0.0.0.0"
+        port => 5044
+      }
+    }
+    filter {
+      mutate {
+        rename => ["log", "message"]
+      }
+      grok {
+        # Logstash parse DATE_CN to datetime with fixed time, can't create dynamic index (start with k8slogidx_)
+        # pattern_definitions => {
+        #   "DATE_CN" => "%{YEAR}[./-]%{MONTHNUM}[./-]%{MONTHDAY}"
+        # }
+        match => {
+          "source" => "/var/log/containers/%{DATA:pod_name}_%{DATA:namespace}_%{GREEDYDATA:container_name}-%{DATA:container_id}.log"
+        }
+        # API Gateway
+        match => {
+          "message" => "%{DATA:log_date} %{TIME:log_time} \[%{USERNAME:log_thread}\] %{LOGLEVEL:log_level} %{DATA:log_program_file} - \[%{DATA:log_app_version}\] \"%{WORD:log_method} <%{DATA:log_session_id}> %{URI:log_request_url}\" >> %{USERNAME:log_app_name}"
+        }
+        # 2018-12-07 13:58:58.961 [http-nio-8080-exec-9] INFO  o.n.p.a.f.LoggerFilter - GET /api/v1/rule/companies/3/devices?normal=false 200 0 252
+        match => {
+          "message" => "%{DATA:log_date} %{TIME:log_time} \[%{USERNAME:log_thread}\] %{LOGLEVEL:log_level} %{DATA:log_program_file} - %{WORD:log_method} %{URIPATHPARAM:log_request_url} %{INT:log_http_status} %{INT:log_response_size} %{INT:log_response_time}"
+        }
+        # plant-insight / pi-job / pi-xinzexing
+        # 2018-12-06 17:10:32.720 [ForkJoinPool.commonPool-worker-4] INFO  o.n.p.j.c.WorkDayShiftSpecCalculator - dpId = 40, putIntoCache list size = 1
+        match => {
+          "message" => "%{DATA:log_date} %{TIME:log_time} \[%{USERNAME:log_thread}\] %{LOGLEVEL:log_level} %{DATA:log_program_file} - %{GREEDYDATA:log_content}"
+        }
+        # rule-engine
+        # 2018-12-07T08:16:12.100 INFO server - GET /api/v1/rule/healthcheck 200 9
+        match => {
+          "message" => "%{DATA:log_date}T%{TIME:log_time} %{LOGLEVEL:log_level} %{DATA:log_unknow} - %{WORD:log_method} %{URIPATHPARAM:log_request_url} %{INT:log_http_status} %{NUMBER:log_response_time}"
+        }
+        # 2018-12-04T01:49:16.029 INFO default - push tag length 7
+        match => {
+          "message" => "%{DATA:log_date}T%{TIME:log_time} %{LOGLEVEL:log_level} %{DATA:log_unknow} - %{GREEDYDATA:log_content}"
+        }
+        # iot-hub-client
+        # 2018-12-07 08:10:04,614 WARNING IoTHubClient.RuntimeDataWorker not find indicator_id: 1772
+        match => {
+          "message" => "%{DATA:log_date} %{TIME:log_time} %{LOGLEVEL:log_level} %{DATA:log_program_file} %{GREEDYDATA:log_content}"
+        }
+        # pi-bk
+        # 2018-12-06T16:44:23.685 28 INFO - \u001b[32m[LoggingInterceptor]\u001b[39m - GET `/api/v1/bkauth/health` 0ms
+        match => {
+          "message" => "%{DATA:log_date}T%{TIME:log_time} %{INT:log_unknown} %{LOGLEVEL:log_level} - .*\[%{DATA:log_program_file}\].* - %{WORD:log_method} `%{URIPATHPARAM:log_origin_url}` %{INT:log_response_time}ms"
+        }
+        # 2018-12-06T16:44:41.147 28 DEBUG - \u001b[36m[MysqlService]\u001b[39m keepConnJob time: 3ms
+        match => {
+          "message" => "%{DATA:log_date}T%{TIME:log_time} %{INT:log_unknown} %{LOGLEVEL:log_level} - .*\[%{DATA:log_program_file}\].* %{DATA:log_content} time: %{INT:log_response_time}ms"
+        }
+        break_on_match => false
+      }
+      date {
+        match => ["timestamp", "ISO8601"]
+        timezone => "Asia/Shanghai"
+        target => "timestamp"
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => [ "elasticsearch:9200" ]
+        user => "kibana"
+        password => "Password1$"
+        manage_template => false
+        index => "k8slogidx_%{+YYYY-MM-dd}"
+      }
+      # debug use
+      # stdout { codec => rubydebug }
+    }
+
+  # pipelines.yml: |

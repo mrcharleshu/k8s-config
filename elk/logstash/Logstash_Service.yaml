@@ -11,6 +11,10 @@ spec:
     component: logstash
   ports:
   - name: http
-    port: 80
+    port: 5044
     protocol: TCP
-    targetPort: 5043
+    targetPort: 5044
+  - name: api
+    port: 9600
+    protocol: TCP
+    targetPort: 9600

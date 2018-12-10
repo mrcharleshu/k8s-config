@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: elk
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: logstash
-        image: elastic/logstash:6.4.3
+        image: elastic/logstash:6.5.1
         volumeMounts:
         - name: logstash-configmap
           mountPath: /usr/share/logstash/config/logstash.yml
@@ -34,8 +34,11 @@ spec:
           requests:
             cpu: 100m
         ports:
-        - containerPort: 5601
+        - containerPort: 5044
           name: http
+          protocol: TCP
+        - containerPort: 9600
+          name: api
           protocol: TCP
       volumes:
         - name: logstash-configmap

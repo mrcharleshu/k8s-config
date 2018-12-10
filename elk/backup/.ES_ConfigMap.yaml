@@ -10,6 +10,8 @@ data:
     discovery.zen.minimum_master_nodes: 1
     #Update max_local_storage_nodes value based on number of nodes
     node.max_local_storage_nodes: 1
+    path.data: /usr/share/elasticsearch/esdata/data
+    path.logs: /usr/share/elasticsearch/esdata/log
     xpack.security.enabled: true
     xpack.monitoring.collection.enabled: true
   role_mapping.yml: |

@@ -1,0 +1,12 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: es-data
+  namespace: elk
+provisioner: kubernetes.io/azure-disk
+parameters:
+  kind: Managed
+  storageaccounttype: Standard_LRS
+  location: chinaeast
+  # skuName: Standard_LRS
+  # storageAccount: {{ .Values.elasticsearch.data.storageAccount }}

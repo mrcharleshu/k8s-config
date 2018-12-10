@@ -16,33 +16,32 @@ filter {
             grok {
                   match => {
                         "source" => "/var/log/containers/%{DATA:pod_name}_%{DATA:namespace}_%{GREEDYDATA:container_name}-%{DATA:container_id}.log"}
-                        match => {
-                              "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{WORD:method} %{URIPATHPARAM:uri} %{NUMBER:status:int} %{NUMBER:size:int} %{NUMBER:response_time:int}"
-                        }
-                        match => {
-                              "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{WORD:method} %{URIPATHPARAM:uri}, status: %{NUMBER:status:int},size: %{NUMBER:size:int}"
-                        }
-                        match => {
-                              "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{GREEDYDATA:log_content}"
-                        }
-                        match => {
-                              "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{GREEDYDATA:http-nio} %{GREEDYDATA:log_content}"
-                        }
-                        match => {
-                              "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{GREEDYDATA:log_content}"
-                        }
-                        match => {
-                              "message" => "%{TIMESTAMP_ISO8601:log_timestamp} %{WORD:log_type}server - %{WORD:method} %{URIPATHPARAM:uri} %{NUMBER:status:int} %{NUMBER:response_time:int}"
-                        }
-                        match => {
-                              "message" => "%{DATA:log_date} %{TIME:log_localtime}%{WORD:log_type}  %{JAVAFILE:log_file}- %{GREEDYDATA:log_content}"
-                        }
-                        match => {
-                              "message" => "%{TIMESTAMP_ISO8601:log_timestamp} %{WORD:log_type}%{WORD:log_file} - %{GREEDYDATA:log_content}"
-                        }
-                        remove_field => ["source"]
-                        break_on_match => false
+                  match => {
+                        "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{WORD:method} %{URIPATHPARAM:uri} %{NUMBER:status:int} %{NUMBER:size:int} %{NUMBER:response_time:int}"
                   }
+                  match => {
+                        "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{WORD:method} %{URIPATHPARAM:uri}, status: %{NUMBER:status:int},size: %{NUMBER:size:int}"
+                  }
+                  match => {
+                        "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{GREEDYDATA:log_content}"
+                  }
+                  match => {
+                        "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{GREEDYDATA:http-nio} %{GREEDYDATA:log_content}"
+                  }
+                  match => {
+                        "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type} %{JAVAFILE:log_file}-%{GREEDYDATA:log_content}"
+                  }
+                  match => {
+                        "message" => "%{TIMESTAMP_ISO8601:log_timestamp} %{WORD:log_type}server - %{WORD:method} %{URIPATHPARAM:uri} %{NUMBER:status:int} %{NUMBER:response_time:int}"
+                  }
+                  match => {
+                        "message" => "%{DATA:log_date} %{TIME:log_localtime} %{WORD:log_type}  %{JAVAFILE:log_file}- %{GREEDYDATA:log_content}"
+                  }
+                  match => {
+                        "message" => "%{TIMESTAMP_ISO8601:log_timestamp} %{WORD:log_type}%{WORD:log_file} - %{GREEDYDATA:log_content}"
+                  }
+                  remove_field => ["source"]
+                  break_on_match => false
             }
       }
 }

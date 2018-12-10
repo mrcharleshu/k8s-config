@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch-data
+  namespace: elk
+  labels:
+    component: elasticsearch
+    role: data
+spec:
+  replicas: 3
+  serviceName: elasticsearch-data
+  selector:
+    matchLabels:
+      component: elasticsearch
+  template:
+    metadata:
+      labels:
+        component: elasticsearch
+        role: data
+    spec:
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - sysctl -w vm.max_map_count=262144
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        name: init-sysctl
+        resources: {}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      containers:
+      - name: elasticsearch-data
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - IPC_LOCK
+        image: "elastic/elasticsearch:6.5.1"
+        imagePullPolicy: Always
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CLUSTER_NAME
+          value: elasticsearch-cluster
+        - name: DISCOVERY_SERVICE
+          value: elasticsearch-discovery
+        - name: ES_JAVA_OPTS
+          value: "-Xms256m -Xmx256m"
+        - name: NETWORK_HOST
+          value: _eth0_
+        # The default value for this environment variable is 2, meaning a cluster
+        # will need a minimum of 2 master nodes to operate. If you have 3 masters
+        # and one dies, the cluster still works.
+        - name: NUMBER_OF_MASTERS
+          value: "2"
+        - name: HTTP_ENABLE
+          value: "false" 
+        - name: NODE_DATA
+          value: "true"
+        - name: NODE_MASTER
+          value: "false"
+        - name: NODE_INGEST
+          value: "false"
+        ports:
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+        - name: es-config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+      # imagePullSecrets:
+      # - name: {{ .Values.common.secretName }}
+      volumes:
+        - name: es-config
+          configMap:
+            name: es-configmap
+  volumeClaimTemplates:
+  - metadata:
+      name: storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: default
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Gi

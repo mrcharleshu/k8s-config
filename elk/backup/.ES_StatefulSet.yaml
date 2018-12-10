@@ -41,13 +41,11 @@ spec:
         ports:
         - containerPort: 9200
           name: http
+          protocol: TCP
         - containerPort: 9300
           name: tcp
+          protocol: TCP
         env:
-          - name: cluster.name
-            value: "elasticsearch-cluster"
-          - name: "xpack.security.enabled"
-            value: "true"
           - name: "TAKE_FILE_OWNERSHIP"
             value: “1”
         volumeMounts:

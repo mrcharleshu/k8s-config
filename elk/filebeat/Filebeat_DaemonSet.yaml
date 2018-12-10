@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   namespace: elk
@@ -6,7 +6,6 @@ metadata:
   labels:
     component: filebeat
 spec:
-  revisionHistoryLimit: 10
   selector:
     matchLabels:
       component: filebeat
@@ -24,25 +23,12 @@ spec:
         command:
         - filebeat
         env:
-        - name: NAMESPACE
-          value: monitor-cluster-ns
-        - name: CHART_INFO
-          value: filebeat - 0.0.1 - elk
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: CLUSTER_NAME
-          value: elk-k8s-cluster
         - name: LOGSTASH_HOSTS
-          value: logstash:5043
+          value: logstash:5044
         - name: LOG_LEVEL
           value: debug
-        image: elastic/filebeat:6.4.3
-        imagePullPolicy: Always
+        image: elastic/filebeat:6.5.1
         name: filebeat
-        resources: {}
         securityContext:
           privileged: true
         terminationMessagePath: /dev/termination-log
@@ -59,9 +45,6 @@ spec:
         - mountPath: /var/lib/docker/containers
           name: varlibdockercontainers
           readOnly: true
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
       securityContext:
         runAsUser: 0
       terminationGracePeriodSeconds: 30

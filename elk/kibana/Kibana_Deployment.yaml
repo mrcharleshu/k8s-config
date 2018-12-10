@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: elk
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: kibana
-        image: elastic/kibana:6.4.3
+        image: elastic/kibana:6.5.1
         resources:
           limits:
             cpu: 1000m
