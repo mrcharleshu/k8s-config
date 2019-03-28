@@ -175,7 +175,7 @@ items:
       # name of the secret that contains the user/password definitions
       nginx.ingress.kubernetes.io/auth-secret: basic-auth
       # message to display with an appropriate context why the authentication is required
-      nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - nanchao'
+      nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - hubin'
       # 由于最新的 k8s 中的 kubernetes-dashboard 强制要求 https，而 ingress nginx 默认是走 http 的，所以需要开启这项。
       nginx.ingress.kubernetes.io/secure-backends: "true"
   spec:
